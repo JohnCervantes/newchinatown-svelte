@@ -8,10 +8,14 @@
   padding: 0;
   box-sizing: border-box;
   font-size: 16px;
+  overflow-x: hidden;
 }
 
 @layer base {
   h2 {
     @apply text-red-500 text-4xl mb-6 font-semibold text-center
+  }
+  section {
+    @apply p-20
   }
 }

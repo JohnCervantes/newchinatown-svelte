@@ -1,6 +1,18 @@
 <script>
+  import { fly } from "svelte/transition";
   import Testimonial from "./Testimonial.svelte";
-  let testimonials = [
+  import food1 from "../assets/food1.png";
+  import food2 from "../assets/food2.png";
+  import food3 from "../assets/food3.png";
+  import {
+    MapLibre,
+    NavigationControl,
+    ScaleControl,
+    GlobeControl,
+    Marker,
+  } from "svelte-maplibre-gl";
+  let activeIndex = $state(0);
+  const testimonials = [
     {
       id: 123,
       message: `Absolutely 100% the best restaurant in Birmingham, Chinese or
@@ -24,13 +36,34 @@
       author: "J Newton",
     },
   ];
+
+  const foodSlides = [
+    { id: 1, url: food1 },
+    { id: 2, url: food2 },
+    { id: 3, url: food3 },
+  ];
+
+  $effect.root(() => {
+    let intervalId = setInterval(() => {
+      // Update the state
+      activeIndex++;
+
+      if (activeIndex >= foodSlides.length) {
+        activeIndex = 0; // Reset the counter to 0
+      }
+    }, 5000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  });
 </script>
 
 <main>
   <section class="flex flex-col justify-center items-center relative h-[250px]">
     <div
       class="absolute inset-0 bg-cover bg-center"
-      style="background-image: url('https://www.newchinatown.net/assets/images/slides/food.jpg'); opacity: 0.55;"
+      style="background-image: url('https://www.newchinatown.net/assets/images/slides/bg.jpg'); opacity: 0.55;"
     ></div>
     <h1
       class="relative text-6xl font-bold mb-4 z-10 text-black text-shadow-xs text-shadow-black"
@@ -52,7 +85,7 @@
     </div>
   </section>
 
-  <section class="text-center p-20">
+  <section class="text-center">
     <h2>Our Story & Commitment</h2>
     <p class="mb-6">
       Welcome to New China Town. We pride ourselves on creating a welcoming,
@@ -67,14 +100,27 @@
     </p>
   </section>
 
-  <section class="bg-[#F8F8F8] p-20">
-    <h2>Food carousel</h2>
+  <section class="bg-[#F8F8F8]">
+    <h2>Popular Dishes</h2>
+    <div class="relative h-[350px] w-full flex justify-center">
+      {#each foodSlides as item, index (item.id)}
+        {#if index === activeIndex}
+          <div
+            class="absolute flex justify-center"
+            in:fly={{ x: -800, duration: 3000 }}
+            out:fly={{ x: 800, duration: 3000 }}
+          >
+            <img class="h-[350px] w-[500px] bg-cover" src={item.url} alt="" />
+          </div>
+        {/if}
+      {/each}
+    </div>
   </section>
 
   <!-- Location -->
-  <section id="location" class="p-20">
+  <section id="location">
     <h2>Visit us</h2>
-    <div class="flex justify-around w-full">
+    <div class="flex justify-around w-full mb-6">
       <div>
         <h3 class="text-3xl font-semibold mb-6">Contact & Address</h3>
         <p class="font-semibold mb-2">New China Town</p>
@@ -88,14 +134,36 @@
         <p class="mb-2">Sunday CLOSED</p>
       </div>
     </div>
+    <div class="flex justify-center">
+      <MapLibre
+        class="h-[55vh] min-h-[300px] w-[150vh]"
+        style="https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json"
+        zoom={17}
+        center={{ lng: -86.79611043915874, lat: 33.501617377500146 }}
+      >
+        <NavigationControl />
+        <ScaleControl />
+        <GlobeControl />
+        <Marker lnglat={[-86.79675416931279, 33.501617377500146]} />
+      </MapLibre>
+    </div>
   </section>
 
   <!-- Testimonials -->
-  <section class="p-20 bg-[#F8F8F8]">
+  <section class="bg-[#F8F8F8]">
     <h2>What Our Customers Say</h2>
-    <div class="flex justify-center items-center gap-6">
-      {#each testimonials as item, index (item.id)}
-        <Testimonial message={item.message} author={item.author} />
+
+    <div class="relative h-[250px] w-full flex justify-center">
+      {#each testimonials as item, index}
+        {#if index === activeIndex}
+          <div
+            class="absolute flex justify-center"
+            in:fly={{ x: -800, duration: 3000 }}
+            out:fly={{ x: 800, duration: 3000 }}
+          >
+            <Testimonial message={item.message} author={item.author} />
+          </div>
+        {/if}
       {/each}
     </div>
   </section>
